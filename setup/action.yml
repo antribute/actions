@@ -1,0 +1,51 @@
+name: Setup
+description: Setup your CI workflow with Node.js and PNPM
+author: Antribute, Inc.
+inputs:
+  nodeVersion:
+    description: The version of Node.js to install
+    required: false
+    default: "18"
+  pnpmVersion:
+    description: The version of PNPM to install
+    required: false
+    default: "latest"
+  skipCheckout:
+    description: When set, skips running git checkout
+    required: false
+    default: "null"
+  skipInstall:
+    description: When set, skips running pnpm install (often used for prod builds)
+    required: false
+    default: "null"
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      if: "${{ github.event.inputs.skipCheckout != 'null' }}"
+      uses: actions/checkout@v3
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.nodeVersion }}
+    - name: Setup PNPM
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ inputs.pnpmVersion }}
+        run_install: false
+    - name: Get PNPM Store Directory
+      id: pnpm-cache
+      shell: bash
+      run: |
+        echo "pnpmStorePath=$(pnpm store path)" >> $GITHUB_OUTPUT
+    - uses: actions/cache@v3
+      name: Setup PNPM cache
+      with:
+        path: ${{ steps.pnpm-cache.outputs.pnpmStorePath }}
+        key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          pnpm-store-
+    - name: Install Dependencies
+      if: "${{ github.event.inputs.skipInstall != 'null' }}"
+      run: pnpm install --frozen-lockfile
+      shell: bash
