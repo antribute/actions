@@ -1,0 +1,35 @@
+name: Check Tag Release
+description: Gets a version from a tag and compares it to what's in a specified package.json
+author: Antribute, Inc.
+inputs:
+  delimiter:
+    description: A delimiter used to split the tag
+    required: false
+    default: " "
+  pkgPath:
+    description: The local path to the package.json of the item you're trying to release
+    required: false
+    default: "./package.json"
+runs:
+  using: "composite"
+  steps:
+    - name: Get Tag Version and Package.json Version
+      id: versions
+      shell: bash
+      run: |
+        # Get Tag Version with Delimiter
+        export TAG_VERSION=$(echo ${{ github.ref_name }} | rev | cut -d ${{ inputs.delimiter }} -f1 | rev)
+        echo tagVersion=$TAG_VERSION >> $GITHUB_OUTPUT
+        # Get Version from Package.json
+        export PKG_VERSION=$(grep -o '"version": "[^"]*' ${{ inputs.pkgPath }} | grep -o '[^"]*$')
+        echo pkgVersion=$PKG_VERSION >> $GITHUB_OUTPUT
+    - name: Compare Tag Version to Package Version
+      shell: bash
+      run: |
+        if [ ${{ steps.versions.outputs.tagVersion }} == ${{ steps.versions.outputs.pkgVersion }} ]
+        then
+          exit 0
+        else
+          echo Error: Tag version ${{ steps.versions.outputs.tagVersion }} does not equal Package version ${{ steps.versions.outputs.pkgVersion }} in file ${{ inputs.pkgPath }}
+          exit 1
+        fi
