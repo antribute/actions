@@ -40,5 +40,5 @@ runs:
           pnpm-store-
     - name: Install Dependencies
       if: "${{ github.event.inputs.skipInstall != 'null' }}"
-      run: pnpm install --frozen-lockfile
+      run: pnpm install
       shell: bash
