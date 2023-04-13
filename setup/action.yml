@@ -9,7 +9,7 @@ inputs:
   pnpmVersion:
     description: The version of PNPM to install
     required: false
-    default: "latest"
+    default: "7.30.5"
   skipInstall:
     description: When set, skips running pnpm install (often used for prod builds)
     required: false
