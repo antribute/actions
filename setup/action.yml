@@ -5,11 +5,11 @@ inputs:
   nodeVersion:
     description: The version of Node.js to install
     required: false
-    default: "18"
+    default: "20"
   pnpmVersion:
     description: The version of PNPM to install
     required: false
-    default: "7.30.5"
+    default: "8.5.1"
   skipInstall:
     description: When set, skips running pnpm install (often used for prod builds)
     required: false
