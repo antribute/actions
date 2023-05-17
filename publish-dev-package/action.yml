@@ -22,6 +22,8 @@ runs:
         export CURRENT_VERSION=$(json -f ${{ inputs.pkgPath }} version)
         # Set a new, dev version
         export DEV_VERSION="${CURRENT_VERSION}-dev.${{ github.sha }}"
+        # Log New Version for Verification
+        echo "Publishing Package with Version ${DEV_VERSION}"
         # Update Package Version
         json -I -f ${{ inputs.pkgPath }} -e "this.version='${DEV_VERSION}'"
     - name: Publish @antribute/config to NPM
