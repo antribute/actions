@@ -1,0 +1,32 @@
+name: Publish Dev Package
+description: Gets a package's current version and appends dev.commit-sha onto the end of it, publishes it to NPM
+author: Antribute, Inc.
+inputs:
+  npmToken:
+    description: The token allowing you to publish to NPM
+    required: true
+  pkgPath:
+    description: The local path to the package.json of the item you're trying to release
+    required: false
+    default: "./package.json"
+runs:
+  using: "composite"
+  steps:
+    - name: Install JSON Package
+      shell: bash
+      run: pnpm i -g json
+    - name: Rename Selected Package Version
+      shell: bash
+      run: |
+        # Get current version from package.json
+        export CURRENT_VERSION=$(json -f ${{ inputs.pkgPath }} version)
+        # Set a new, dev version
+        export DEV_VERSION="${CURRENT_VERSION}-dev.${{ github.sha }}"
+        # Update Package Version
+        json -I -f ${{ inputs.pkgPath }} -e "this.version='${DEV_VERSION}'"
+    - name: Publish @antribute/config to NPM
+      uses: JS-DevTools/npm-publish@v2
+      with:
+        package: ${{ inputs.pkgPath }}
+        tag: dev
+        token: ${{ inputs.npmToken }}
